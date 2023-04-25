@@ -1,4 +1,4 @@
-# version:  0.4-alpha
+# version:  0.5-alpha
 #  author:  Laurens T. Rosinski
 # license:  AGPL-3.0
 #  github:  <https://github.com/GotaLoveFiraCode/BMS_Berlin_Model>

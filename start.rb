@@ -1,52 +1,59 @@
-#!/usr/bin/env ruby
+# version:  0.4-alpha
+#  author:  Laurens T. Rosinski
+# license:  AGPL-3.0
+#  github:  <https://github.com/GotaLoveFiraCode/BMS_Berlin_Model>
+# credits:  Ms Millian, archlinux.org, rubymonk.org
 
-puts "Starting Application `Berlin'. . ."
+puts ":: Starting Application `Berlin'. . .\n"
 
 begin
   require 'tty-spinner'
-  LIB_REQ = "success"
+  LIB_REQ1 = ''
 rescue LoadError
-  puts "\tERROR: `tty-spinner' is not installed, run `bundler install'\n"
+  abort("\tERROR: `tty-spinner' is not installed, run `bundler install'.\n")
 end
 
 begin
-  require 'pastel'
-  LIB_REQ2 = "success"
+  require 'inquirer'
+  LIB_REQ2 = ''
 rescue LoadError
-  puts "\tERROR: `pastel' is not installed, run `bundler install'\n"
+  puts "\tERROR: `inquirer' is not installed, run `bundler install'.\n"
 end
 
+# gpio_ans = Ask.list "Which gpio ruby gem do you want to use", [
+#   "`pi_piper' (recomended)",
+#   "`rpi_gpio' (untested)"
+# ]
+
+gpio_ans = Ask.confirm "Use `rpi_gpio' (untested) instead of `pi_piper' (recomended)", default: false
+if gpio_ans == "true"
+  begin
+    require 'rpi_gpio'
+    LIB_REQ3 = ''
+  rescue LoadError
+    puts "\tFATAL: `rpi_gpio' is not installed, run `bundler install'.\n"
+  end
+else
+  begin
+    require 'pi_piper'
+    LIB_REQ3 = ''
+  rescue LoadError
+    puts "\tFATAL: `pi_piper' is not installed, run `bundler install'.\n"
+  end
+end
+
+unless defined?(LIB_REQ1) and defined?(LIB_REQ2) and defined?(LIB_REQ3)
+  abort("\tFATAL: gems are not installed/loaded, run `sudo bundler install'.")
+else
+  puts ":: Startup successful!\n"
+end
+
+puts "\n:: Loading libraries. . .\n"
 begin
-  require 'rpi_gpio'
-  LIB_REQ3 = "success"
+  require './berlin.rb'
+  berlin = Berlin.new
+  puts ":: Libraries loaded!"
 rescue LoadError
-  puts Pastel.new.red("\tERROR: fatal ::") + Pastel.new.yellow("`rpi_gpio' is not installed, run `bundler install'\n")
+  abort("\tFATAL: `berlin.rb' is not loaded, please make sure file is present.")
 end
 
-pastel = Pastel.new
-puts pastel.green("Startup successful!\n\n") if defined?(LIB_REQ) && defined?(LIB_REQ2) && defined?(LIB_REQ3)
-
-format ="#{pastel.yellow("Loading Libraries… :spinner")}"
-spinner = TTY::Spinner.new(format, format: :bouncing_ball, success_mark: pastel.green("[✔]"), error_mark: pastel.red("[✖]"))
-spinner.auto_spin
-begin
-  require_relative 'lib/berlin'
-  # sleep(1)
-  spinner.success("\n#{pastel.green("Libraries loaded!")}\n")
-rescue LoadError
-  spinner.error
-  puts "\t" + pastel.red("ERROR:") + pastel.yellow("`berlin.rb is not loaded, please make sure file is present under ./lib'")
-end
-
-Berlin::Test.new
-
-puts pastel.white("Activate `Berlin'?")
-answer = gets.chomp
-
-berlin = Active.new if answer == "y" || answer == "yes"
-return unless answer == "y" || answer == "yes"
-
-puts pastel.white("Turn `Berlin' on?") if answer == "yes" || answer == "y"
-answer = gets.chomp
-
-berlin.on if answer == 'y' || 'yes'

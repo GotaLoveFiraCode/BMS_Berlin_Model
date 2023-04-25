@@ -2,10 +2,22 @@ GEM
   remote: https://rubygems.org/
   specs:
     epoll (0.3.0)
+    eventmachine (1.0.9)
+    ffi (1.15.5)
+    inquirer (0.2.1)
+      term-ansicolor (>= 1.2.2)
     pastel (0.8.0)
       tty-color (~> 0.5)
+    pi_piper (2.0.0)
+      eventmachine (= 1.0.9)
+      ffi
     rpi_gpio (0.5.0)
       epoll (~> 0.3)
+    sync (0.5.0)
+    term-ansicolor (1.7.1)
+      tins (~> 1.0)
+    tins (1.32.1)
+      sync
     tty-color (0.6.0)
     tty-cursor (0.7.1)
     tty-spinner (0.9.3)
@@ -15,7 +27,9 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
+  inquirer
   pastel
+  pi_piper
   rpi_gpio
   tty-spinner
 

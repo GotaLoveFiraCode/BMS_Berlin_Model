@@ -1,0 +1,23 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    epoll (0.3.0)
+    pastel (0.8.0)
+      tty-color (~> 0.5)
+    rpi_gpio (0.5.0)
+      epoll (~> 0.3)
+    tty-color (0.6.0)
+    tty-cursor (0.7.1)
+    tty-spinner (0.9.3)
+      tty-cursor (~> 0.7)
+
+PLATFORMS
+  x86_64-linux
+
+DEPENDENCIES
+  pastel
+  rpi_gpio
+  tty-spinner
+
+BUNDLED WITH
+   2.4.8

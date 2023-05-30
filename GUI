@@ -8,15 +8,7 @@
 
 puts ":: Starting Application `Berlin'. . .\n"
 
-begin
-  require 'gtk3'
-  LIB_REQ1 = ''
-rescue LoadError
-  puts "GUI (gtk3) failed to load, please check that gtk3 gem is installed"
-  puts "Run `bundler install'."
-  puts "Continuing with TTY interface…"
-end
-
+# load prompt gem
 begin
   require 'inquirer'
   LIB_REQ2 = ''
@@ -24,6 +16,7 @@ rescue LoadError
   puts "\tERROR: `inquirer' is not installed, run `bundler install'.\n"
 end
 
+# choose gpio gem (only pi_piper available currently) and load said gem
 gpio_ans = Ask.confirm "Use `rpi_gpio' (untested) instead of `pi_piper' (recomended)", default: false
 if gpio_ans == "true"
   begin
@@ -31,56 +24,92 @@ if gpio_ans == "true"
     LIB_REQ3 = ''
   rescue LoadError
     puts "\tFATAL: `rpi_gpio' is not installed, run `bundler install'.\n"
-  end
+  end # block, 30
 else
-  begin
+  begin # default
     require 'pi_piper'
     LIB_REQ3 = ''
   rescue LoadError
     puts "\tFATAL: `pi_piper' is not installed, run `bundler install'.\n"
-  end
+  end # block, 37
+end # if statement, 29
+
+# load gtk
+begin
+  require 'gtk3'
+  GTK_ACTIVE = true
+rescue LoadError
+  puts "GUI (gtk3) failed to load, please check that gtk3 gem is installed"
+  puts "Run `bundler install'."
+  puts "Continuing with TTY interface…"
+  GTK_ACTIVE = false
 end
 
-unless defined?(LIB_REQ1) and defined?(LIB_REQ2) and defined?(LIB_REQ3)
+unless defined?(LIB_REQ2) and defined?(LIB_REQ3)
   abort("\tFATAL: gems are not installed/loaded, run `sudo bundler install'.")
 else
   puts ":: Startup successful!\n"
 end
 
+# load gtk file and berlin class
 puts "\n:: Loading libraries. . .\n"
 require_relative 'berlin'
 berlin = Berlin.new
 puts ":: Libraries loaded!"
 
-app = Gtk::Application.new("io.github.GotaLoveFiraCode", :flags_none)
+if GTK_ACTIVE == true
+  gui = Gtk::Application.new("io.github.GotaLoveFiraCode", :flags_none)
 
-app.signal_connect "activate" do |application|
+  gui.signal_connect "activate" do |application|
+    berlin.button # make button*s servicable
+
 # new window
-  window = Gtk::ApplicationWindow.new(application)
-  window.set_title("Berlin Model Controll Station")
-  window.set_border_width(20)
+    window = Gtk::ApplicationWindow.new(application)
+    window.set_title("Berlin Model Controll Station")
+    window.set_border_width(20)
 
 # Grid container
-  grid = Gtk::Grid.new
-  window.add(grid)
+    grid = Gtk::Grid.new
+    window.add(grid)
 
-  button = Gtk::Button.new(:label => "Activate")
-  button.signal_connect("clicked") { berlin.gui_test; puts ":: Berlin Model Activated" }
+    button = Gtk::Button.new(:label => "Test")
+    button.signal_connect("clicked") { berlin.gui_test }
 # first cell, no spanning
-  grid.attach(button, 0, 0, 1, 1)
+    grid.attach(button, 0, 0, 1, 1)
 
-  button = Gtk::Button.new(:label => "Turn lights on")
-  button.signal_connect("clicked") { puts "Success!"; berlin.lights(true) }
+    button = Gtk::Button.new(:label => "Turn lights on")
+    button.signal_connect("clicked") { berlin.lights(true) }
 # second cell, no spanning
-  grid.attach(button, 1, 0, 1, 1)
+    grid.attach(button, 1, 0, 1, 1)
 
-  button = Gtk::Button.new(:label => "Turn lights off")
-  button.signal_connect("clicked") { berlin.lights(false); window.destroy }
+    button = Gtk::Button.new(:label => "Turn lights off")
+    button.signal_connect("clicked") { berlin.lights(false) }
 # first cell, second row; spanning 2 cells horizontally
-  grid.attach(button, 0, 1, 2, 1)
+    grid.attach(button, 2, 0, 1, 1)
 
-  window.show_all
-end
+    button = Gtk::Button.new(:label => "shutdown")
+    button.signal_connect("clicked") { berlin.shutdown; window.destroy }
 
-puts app.run([$0] + ARGV)
+    window.show_all
+  end # gui.signal_connect
+
+  puts gui.run([$0] + ARGV)
+
+else if GTK_ACTIVE == false
+  puts ":: Use buttons for activation / deactivation"
+  puts ":: enter 'on' or 'off' for activation and deactivation manually: "
+  loop do
+    berlin.test
+    berlin.button
+    setting = gets.chomp
+    berlin.lights(true)  if setting == 'on'
+    berlin.lights(false) if setting == 'off'
+    puts "Close application (y/N)?"
+    ans = gets.chomp
+    berlin.shutdown if ans == 'y' || ans == 'yes'
+    break if ans == 'y' | and == 'yes'
+  end # loop do
+else
+  puts ":: There has been an error"
+end # if statement
 

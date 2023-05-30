@@ -1,13 +1,51 @@
+#!/usr/bin/env ruby
+
 class Berlin
+  include PiPiper
+
   def initialize
-    puts "Since I do not *own* a raspberrypi, and I don’t seem to be able to ssh into one, I was not able to set up a testing system for rpi_gpio."
-    puts "As a result I am stuck with this rather meager initialize method."
-    puts "I don’t have any additional methods because I don’t actually have any tasks yet, so that’s why there’s no code yet…"
+    @gpio_out = Pin.new(:pin => 2, :direction => :out)
+    @gpio_in = Pin.new(:pin => 4, :direction => :in)
+    @gpio_in_off = Pin.new(:pin => 17, :direction => :in)
   end
-  # I need access to the gpio pins, and need circutry to tell me which ones to turn on before I can do anything.
-  def lights
+
+  def gui_test
+    puts "=> GUI test successful!"
   end
-  def other
+
+  def shutdown
+    puts "=> powering off"
+    puts "==> WARNING: this funktion has not yet been created!"
+  end
+
+  def lights(set)
+
+    if set == true
+      @gpio_out.on
+    else if set == false
+      @gpio_out.off
+    else
+      puts "=> ERROR: wrong input for `river_lights'"
+    end
+
+  end
+
+  def button
+
+    after @gpio_in, :goes => :high do
+      puts "=> Button activated, set to high"
+      lights(true)
+    end
+
+    # after @gpio_in, :goes => :low do
+    #   puts "=> Button deactivated, set to low"
+    #   lights(false)
+    # end
+
+    after @gpio_in_off, :goes => :high do
+      puts "=> Button deactivated, set to low"
+      lights(false)
+    end
   end
 end
 

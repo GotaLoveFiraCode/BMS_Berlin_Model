@@ -2,8 +2,9 @@
 
 source "https://rubygems.org"
 
-gem "rpi_gpio" # GPIO controll, unstable.
-gem "pi_piper" # GPIO controll, stable.
-gem "inquirer" # Prompts for questions and whatnot.
-gem "tty-spinner" # I’ll probably need this later.
-gem "pastel" # Colors.
+gem "gtk3"        # GTK3 for GUI
+gem "rpi_gpio"    # GPIO controll, unstable.
+gem "pi_piper"    # GPIO controll, stable.
+gem "inquirer"    # TTY prompts
+gem "tty-spinner" # TTY (loading) animations
+gem "pastel"      # TTY colors.

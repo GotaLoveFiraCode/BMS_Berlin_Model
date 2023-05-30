@@ -1,0 +1,86 @@
+#!/usr/bin/env ruby
+
+# version:  0.6-alpha
+#  author:  Laurens T. Rosinski
+# license:  AGPL-3.0
+#  github:  <https://github.com/GotaLoveFiraCode/BMS_Berlin_Model>
+# credits:  Ms Millian, archlinux.org, rubymonk.org
+
+puts ":: Starting Application `Berlin'. . .\n"
+
+begin
+  require 'gtk3'
+  LIB_REQ1 = ''
+rescue LoadError
+  puts "GUI (gtk3) failed to load, please check that gtk3 gem is installed"
+  puts "Run `bundler install'."
+  puts "Continuing with TTY interface…"
+end
+
+begin
+  require 'inquirer'
+  LIB_REQ2 = ''
+rescue LoadError
+  puts "\tERROR: `inquirer' is not installed, run `bundler install'.\n"
+end
+
+gpio_ans = Ask.confirm "Use `rpi_gpio' (untested) instead of `pi_piper' (recomended)", default: false
+if gpio_ans == "true"
+  begin
+    require 'rpi_gpio'
+    LIB_REQ3 = ''
+  rescue LoadError
+    puts "\tFATAL: `rpi_gpio' is not installed, run `bundler install'.\n"
+  end
+else
+  begin
+    require 'pi_piper'
+    LIB_REQ3 = ''
+  rescue LoadError
+    puts "\tFATAL: `pi_piper' is not installed, run `bundler install'.\n"
+  end
+end
+
+unless defined?(LIB_REQ1) and defined?(LIB_REQ2) and defined?(LIB_REQ3)
+  abort("\tFATAL: gems are not installed/loaded, run `sudo bundler install'.")
+else
+  puts ":: Startup successful!\n"
+end
+
+puts "\n:: Loading libraries. . .\n"
+require_relative 'berlin'
+berlin = Berlin.new
+puts ":: Libraries loaded!"
+
+app = Gtk::Application.new("io.github.GotaLoveFiraCode", :flags_none)
+
+app.signal_connect "activate" do |application|
+# new window
+  window = Gtk::ApplicationWindow.new(application)
+  window.set_title("Berlin Model Controll Station")
+  window.set_border_width(20)
+
+# Grid container
+  grid = Gtk::Grid.new
+  window.add(grid)
+
+  button = Gtk::Button.new(:label => "Activate")
+  button.signal_connect("clicked") { berlin.gui_test; puts ":: Berlin Model Activated" }
+# first cell, no spanning
+  grid.attach(button, 0, 0, 1, 1)
+
+  button = Gtk::Button.new(:label => "IDK")
+  button.signal_connect("clicked") { puts "Success!" }
+# second cell, no spanning
+  grid.attach(button, 1, 0, 1, 1)
+
+  button = Gtk::Button.new(:label => "Quit")
+  button.signal_connect("clicked") { berlin.shutdown; window.destroy }
+# first cell, second row; spanning 2 cells horizontally
+  grid.attach(button, 0, 1, 2, 1)
+
+  window.show_all
+end
+
+puts app.run([$0] + ARGV)
+

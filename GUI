@@ -69,13 +69,13 @@ app.signal_connect "activate" do |application|
 # first cell, no spanning
   grid.attach(button, 0, 0, 1, 1)
 
-  button = Gtk::Button.new(:label => "IDK")
-  button.signal_connect("clicked") { puts "Success!" }
+  button = Gtk::Button.new(:label => "Turn lights on")
+  button.signal_connect("clicked") { puts "Success!"; berlin.lights(true) }
 # second cell, no spanning
   grid.attach(button, 1, 0, 1, 1)
 
-  button = Gtk::Button.new(:label => "Quit")
-  button.signal_connect("clicked") { berlin.shutdown; window.destroy }
+  button = Gtk::Button.new(:label => "Turn lights off")
+  button.signal_connect("clicked") { berlin.lights(false); window.destroy }
 # first cell, second row; spanning 2 cells horizontally
   grid.attach(button, 0, 1, 2, 1)
 

@@ -107,9 +107,10 @@ else if GTK_ACTIVE == false
     puts "Close application (y/N)?"
     ans = gets.chomp
     berlin.shutdown if ans == 'y' || ans == 'yes'
-    break if ans == 'y' | and == 'yes'
+    break if ans == 'y' and ans == 'yes'
   end # loop do
 else
   puts ":: There has been an error"
 end # if statement
 
+end
